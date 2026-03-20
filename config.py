@@ -7,6 +7,10 @@
 # Las API keys y parametros se definen aqui para facilitar su uso.
 
 import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde archivo .env
+load_dotenv()
 
 # --- CONFIGURACION DE API ---
 # La API key de Google Gemini se lee de una variable de entorno
