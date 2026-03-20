@@ -52,6 +52,13 @@ def texto_a_voz(texto):
     archivo_temp.close()
 
     # Ejecutar la generacion de audio
-    asyncio.run(_generar_audio_async(texto, archivo_salida))
+    # Nota: se usa new_event_loop() en vez de asyncio.run() porque
+    # Gradio ya tiene un event loop corriendo en Windows y asyncio.run()
+    # lanzaria un error "cannot run nested event loop".
+    loop = asyncio.new_event_loop()
+    try:
+        loop.run_until_complete(_generar_audio_async(texto, archivo_salida))
+    finally:
+        loop.close()
 
     return archivo_salida
