@@ -35,7 +35,7 @@ def analizar_imagen(imagen):
     configurar_gemini()
 
     # Usar modelo Gemini con vision
-    modelo = genai.GenerativeModel("gemini-2.0-flash")
+    modelo = genai.GenerativeModel("gemini-2.5-flash")
 
     # Prompt para que describa como asistente de accesibilidad
     prompt = """Eres un asistente de accesibilidad visual para personas con discapacidad visual.
@@ -47,8 +47,10 @@ Incluye:
 - Cualquier texto visible
 - El contexto general de la escena
 
-Habla de forma natural y descriptiva, como si le estuvieras contando a alguien
-que no puede ver lo que hay frente a ellos. Se conciso pero completo."""
+Regla MUY IMPORTANTE: Tu respuesta será leída en voz alta por un sistema TTS. 
+NO uses NINGÚN formato Markdown (nada de asteriscos, sin negritas, sin listas con guiones). 
+Escribe todo en párrafos de texto plano natural y descriptivo, como si le estuvieras 
+contando a alguien que no puede ver lo que hay frente a ellos. Se conciso pero completo."""
 
     # Enviar imagen al modelo
     respuesta = modelo.generate_content([prompt, imagen])
