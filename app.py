@@ -35,6 +35,9 @@ def procesar_imagen(imagen):
         return "No se recibio ninguna imagen. Por favor sube una foto o usa la camara.", None
 
     try:
+        # Notificar al usuario que el proceso comenzo
+        gr.Info("Procesando imagen, por favor espera un momento...")
+        
         # Paso 1: Analizar imagen con Gemini Vision
         descripcion = analizar_imagen(imagen)
 
@@ -44,8 +47,20 @@ def procesar_imagen(imagen):
         return descripcion, archivo_audio
 
     except Exception as e:
-        error_msg = f"Error al procesar la imagen: {str(e)}"
-        return error_msg, None
+        error_tec = str(e)
+        print(f"Error interno detectado: {error_tec}")
+        
+        # Mensajes de estado amigables dependiendo del error
+        if "Quota" in error_tec or "429" in error_tec:
+            msg = "⚠️ El servicio está saturado en este momento. Por favor, intenta de nuevo en unos minutos."
+        elif "API_KEY" in error_tec or "No se encontro" in error_tec:
+            msg = "⚠️ Problema de configuración: La clave de Google Gemini no está configurada correctamente."
+        elif "WinError" in error_tec or "Connection" in error_tec:
+            msg = "⚠️ Hubo un problema de conexión. Por favor, comprueba tu internet y vuelve a intentarlo."
+        else:
+            msg = "⚠️ Lo siento, ocurrió un error técnico inesperado. Por favor, intenta con otra imagen."
+            
+        return msg, None
 
 
 # =============================================================
