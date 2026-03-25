@@ -10,7 +10,7 @@ import edge_tts
 import asyncio
 import tempfile
 import os
-from config import VOZ_ESPAÑOL, VOZ_VELOCIDAD
+from config import VOZ_ESPAÑOL, VOZ_VELOCIDAD, VOZ_TONO, VOZ_VOLUMEN
 
 
 async def _generar_audio_async(texto, archivo_salida):
@@ -26,7 +26,9 @@ async def _generar_audio_async(texto, archivo_salida):
     communicate = edge_tts.Communicate(
         text=texto,
         voice=VOZ_ESPAÑOL,
-        rate=VOZ_VELOCIDAD
+        rate=VOZ_VELOCIDAD,
+        volume=VOZ_VOLUMEN,
+        pitch=VOZ_TONO
     )
     await communicate.save(archivo_salida)
     return archivo_salida
