@@ -10,10 +10,40 @@
 # la escena y reproduce la descripcion en voz alta.
 
 import gradio as gr
+import os
 from PIL import Image
 from vision import analizar_imagen
 from tts import texto_a_voz
 from config import TITULO_APP, DESCRIPCION_APP, VOCES_DISPONIBLES, VOZ_ESPAÑOL
+
+# --- CSS personalizado para un look profesional y accesible ---
+CSS_PERSONALIZADO = """
+.gradio-container {
+    max-width: 1100px !important;
+    margin: auto;
+}
+
+#titulo-principal {
+    text-align: center;
+    margin-bottom: 0;
+}
+
+#descripcion-app {
+    text-align: center;
+    opacity: 0.85;
+    margin-top: 0;
+}
+
+.panel-entrada, .panel-salida {
+    border-radius: 12px !important;
+}
+
+footer {
+    text-align: center;
+    opacity: 0.7;
+    font-size: 0.85em;
+}
+"""
 
 
 def procesar_imagen(imagen, nombre_voz):
@@ -69,23 +99,29 @@ def procesar_imagen(imagen, nombre_voz):
 # INTERFAZ GRADIO
 # =============================================================
 
-# Crear la interfaz
+# Crear la interfaz con tema profesional y CSS personalizado
 with gr.Blocks(
     title=TITULO_APP,
-    theme=gr.themes.Soft()
+    theme=gr.themes.Soft(
+        primary_hue="blue",
+        secondary_hue="sky",
+        neutral_hue="slate",
+        font=[gr.themes.GoogleFont("Inter"), "sans-serif"]
+    ),
+    css=CSS_PERSONALIZADO
 ) as app:
 
-    # Encabezado
-    gr.Markdown(f"# 👁️ {TITULO_APP}")
-    gr.Markdown(DESCRIPCION_APP)
+    # Encabezado centrado y profesional
+    gr.Markdown(f"# 👁️ {TITULO_APP}", elem_id="titulo-principal")
+    gr.Markdown(DESCRIPCION_APP, elem_id="descripcion-app")
 
     with gr.Row():
         # Columna izquierda: entrada de imagen
-        with gr.Column(scale=1):
+        with gr.Column(scale=1, elem_classes="panel-entrada"):
             gr.Markdown("### 📷 Imagen de entrada")
             imagen_input = gr.Image(
                 type="pil",
-                label="Sube una imagen o usa la camara",
+                label="Sube una imagen o usa la cámara",
                 sources=["upload", "webcam"]
             )
             
@@ -94,7 +130,7 @@ with gr.Blocks(
             selector_voz = gr.Dropdown(
                 choices=opciones_voces,
                 value=opciones_voces[0],
-                label="Seleccionar Voz / Acento",
+                label="🎙️ Seleccionar Voz / Acento",
                 interactive=True
             )
             
@@ -105,19 +141,33 @@ with gr.Blocks(
             )
 
         # Columna derecha: resultados
-        with gr.Column(scale=1):
-            gr.Markdown("### 📝 Descripcion de la escena")
+        with gr.Column(scale=1, elem_classes="panel-salida"):
+            gr.Markdown("### 📝 Descripción de la escena")
             texto_output = gr.Textbox(
-                label="Descripcion generada",
+                label="Descripción generada",
                 lines=10,
                 interactive=False
             )
-            gr.Markdown("### 🔊 Audio de la descripcion")
+            gr.Markdown("### 🔊 Audio de la descripción")
             audio_output = gr.Audio(
-                label="Reproducir descripcion",
+                label="Reproducir descripción",
                 type="filepath",
                 autoplay=True
             )
+
+    # --- Imagenes de ejemplo (backup para la demo del 9 de abril) ---
+    ruta_ejemplos = os.path.join(os.path.dirname(__file__), "ejemplos")
+    if os.path.exists(ruta_ejemplos):
+        gr.Markdown("### 🖼️ Imágenes de ejemplo (haz clic para probar)")
+        gr.Examples(
+            examples=[
+                [os.path.join(ruta_ejemplos, "escritorio.png"), opciones_voces[0]],
+                [os.path.join(ruta_ejemplos, "calle.png"), opciones_voces[0]],
+                [os.path.join(ruta_ejemplos, "cocina.png"), opciones_voces[0]],
+            ],
+            inputs=[imagen_input, selector_voz],
+            label="Ejemplos precargados"
+        )
 
     # Conectar boton con funcion (ahora pasa la imagen y el dropdown de la voz)
     boton_analizar.click(
