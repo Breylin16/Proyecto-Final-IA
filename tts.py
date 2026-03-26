@@ -13,19 +13,20 @@ import os
 from config import VOZ_ESPAÑOL, VOZ_VELOCIDAD, VOZ_TONO, VOZ_VOLUMEN
 
 
-async def _generar_audio_async(texto, archivo_salida):
+async def _generar_audio_async(texto, archivo_salida, voz_id):
     """Genera audio a partir de texto usando Edge TTS (asincrono).
 
     Args:
         texto: str - el texto a convertir en voz
         archivo_salida: str - ruta donde guardar el archivo de audio
+        voz_id: str - el ID del lenguaje
 
     Returns:
         str - ruta al archivo de audio generado
     """
     communicate = edge_tts.Communicate(
         text=texto,
-        voice=VOZ_ESPAÑOL,
+        voice=voz_id,
         rate=VOZ_VELOCIDAD,
         volume=VOZ_VOLUMEN,
         pitch=VOZ_TONO
@@ -34,7 +35,7 @@ async def _generar_audio_async(texto, archivo_salida):
     return archivo_salida
 
 
-def texto_a_voz(texto):
+def texto_a_voz(texto, voz_id=VOZ_ESPAÑOL):
     """Convierte texto a un archivo de audio MP3.
 
     Usa Edge TTS (Microsoft) para generar voz natural en español.
@@ -42,6 +43,7 @@ def texto_a_voz(texto):
 
     Args:
         texto: str - la descripcion a convertir en voz
+        voz_id: str - identificador de la voz dictado por la UI
 
     Returns:
         str - ruta al archivo MP3 generado
@@ -59,7 +61,7 @@ def texto_a_voz(texto):
     # lanzaria un error "cannot run nested event loop".
     loop = asyncio.new_event_loop()
     try:
-        loop.run_until_complete(_generar_audio_async(texto, archivo_salida))
+        loop.run_until_complete(_generar_audio_async(texto, archivo_salida, voz_id))
     finally:
         loop.close()
 

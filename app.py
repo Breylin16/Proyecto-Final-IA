@@ -13,20 +13,21 @@ import gradio as gr
 from PIL import Image
 from vision import analizar_imagen
 from tts import texto_a_voz
-from config import TITULO_APP, DESCRIPCION_APP
+from config import TITULO_APP, DESCRIPCION_APP, VOCES_DISPONIBLES, VOZ_ESPAÑOL
 
 
-def procesar_imagen(imagen):
+def procesar_imagen(imagen, nombre_voz):
     """Funcion principal: recibe imagen, retorna descripcion + audio.
 
     Pipeline:
-    1. Recibe la imagen del usuario (upload o camara)
+    1. Recibe la imagen y la voz desde la interfaz
     2. Envia la imagen a Gemini Vision para obtener descripcion
     3. Convierte la descripcion a voz con Edge TTS
     4. Retorna el texto y el audio al usuario
 
     Args:
         imagen: PIL.Image - imagen capturada por el usuario
+        nombre_voz: str - clave visible seleccionada del dropdown
 
     Returns:
         tuple: (descripcion_texto, ruta_audio)
@@ -35,14 +36,15 @@ def procesar_imagen(imagen):
         return "No se recibio ninguna imagen. Por favor sube una foto o usa la camara.", None
 
     try:
-        # Notificar al usuario que el proceso comenzo
+        # Notificar visualmente y resolver el acento correspondiente
         gr.Info("Procesando imagen, por favor espera un momento...")
+        voz_real = VOCES_DISPONIBLES.get(nombre_voz, VOZ_ESPAÑOL)
         
         # Paso 1: Analizar imagen con Gemini Vision
         descripcion = analizar_imagen(imagen)
 
         # Paso 2: Convertir descripcion a voz
-        archivo_audio = texto_a_voz(descripcion)
+        archivo_audio = texto_a_voz(descripcion, voz_id=voz_real)
 
         return descripcion, archivo_audio
 
@@ -86,8 +88,18 @@ with gr.Blocks(
                 label="Sube una imagen o usa la camara",
                 sources=["upload", "webcam"]
             )
+            
+            # Selector de voces para navegacion de configuracion
+            opciones_voces = list(VOCES_DISPONIBLES.keys())
+            selector_voz = gr.Dropdown(
+                choices=opciones_voces,
+                value=opciones_voces[0],
+                label="Seleccionar Voz / Acento",
+                interactive=True
+            )
+            
             boton_analizar = gr.Button(
-                "🔍 Describir escena",
+                "🔍 Describir escena (O presiona Enter)",
                 variant="primary",
                 size="lg"
             )
@@ -107,12 +119,45 @@ with gr.Blocks(
                 autoplay=True
             )
 
-    # Conectar boton con funcion
+    # Conectar boton con funcion (ahora pasa la imagen y el dropdown de la voz)
     boton_analizar.click(
         fn=procesar_imagen,
-        inputs=[imagen_input],
+        inputs=[imagen_input, selector_voz],
         outputs=[texto_output, audio_output]
     )
+
+    # ================= Accesibilidad Global =================
+    # JavaScript Inyectado: Escucha el teclado para Discapacidad Visual
+    js_accesibilidad = """
+    function() {
+        document.addEventListener('keydown', function(event) {
+            // Si estira el dedo y presiona la enorme tecla Enter
+            if (event.key === 'Enter') {
+                const btn = document.querySelector('button.primary');
+                if (btn) {
+                    // Genera el bip audible para confirmar
+                    try {
+                        let ac = new (window.AudioContext || window.webkitAudioContext)();
+                        let osc = ac.createOscillator();
+                        let gain = ac.createGain();
+                        osc.connect(gain);
+                        gain.connect(ac.destination);
+                        osc.frequency.value = 800; // tono
+                        gain.gain.value = 0.1;     // volumen
+                        osc.start();
+                        osc.stop(ac.currentTime + 0.1);
+                    } catch(e) {}
+                    
+                    // Simular el disparo automatico
+                    btn.click();
+                }
+            }
+        });
+    }
+    """
+    
+    # Acoplar el controlador al cargar la pagina web
+    app.load(_js=js_accesibilidad)
 
     # Pie de pagina
     gr.Markdown("---")

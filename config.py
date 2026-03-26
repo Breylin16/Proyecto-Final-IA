@@ -20,7 +20,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # --- CONFIGURACION DE VOZ (TTS) ---
 # Edge TTS permite usar voces de Microsoft de forma gratuita
 # Lista de voces en español disponibles:
-VOZ_ESPAÑOL = "es-MX-DaliaNeural"  # Voz femenina mexicana (clara y natural)
+VOCES_DISPONIBLES = {
+    "🇲🇽 Dalia (México) - Femenina clara": "es-MX-DaliaNeural",
+    "🇪🇸 Elvira (España) - Femenina formal": "es-ES-ElviraNeural",
+    "🇨🇴 Salome (Colombia) - Femenina cálida": "es-CO-SalomeNeural"
+}
+VOZ_ESPAÑOL = VOCES_DISPONIBLES["🇲🇽 Dalia (México) - Femenina clara"] # Voz por defecto
 VOZ_VELOCIDAD = "+0%"               # Velocidad normal (+5% más rápido, -5% más lento)
 VOZ_TONO = "+0Hz"                   # Tono de la voz (ajuste fino en Hz para mayor realismo)
 VOZ_VOLUMEN = "+0%"                 # Volumen base
