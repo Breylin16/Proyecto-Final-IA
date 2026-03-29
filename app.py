@@ -99,16 +99,9 @@ def procesar_imagen(imagen, nombre_voz):
 # INTERFAZ GRADIO
 # =============================================================
 
-# Crear la interfaz con tema profesional y CSS personalizado
+# Crear la interfaz
 with gr.Blocks(
-    title=TITULO_APP,
-    theme=gr.themes.Soft(
-        primary_hue="blue",
-        secondary_hue="sky",
-        neutral_hue="slate",
-        font=[gr.themes.GoogleFont("Inter"), "sans-serif"]
-    ),
-    css=CSS_PERSONALIZADO
+    title=TITULO_APP
 ) as app:
 
     # Encabezado centrado y profesional
@@ -177,37 +170,30 @@ with gr.Blocks(
     )
 
     # ================= Accesibilidad Global =================
-    # JavaScript Inyectado: Escucha el teclado para Discapacidad Visual
+    # JavaScript: Escucha el teclado para Discapacidad Visual
     js_accesibilidad = """
     function() {
         document.addEventListener('keydown', function(event) {
-            // Si estira el dedo y presiona la enorme tecla Enter
             if (event.key === 'Enter') {
                 const btn = document.querySelector('button.primary');
                 if (btn) {
-                    // Genera el bip audible para confirmar
                     try {
                         let ac = new (window.AudioContext || window.webkitAudioContext)();
                         let osc = ac.createOscillator();
                         let gain = ac.createGain();
                         osc.connect(gain);
                         gain.connect(ac.destination);
-                        osc.frequency.value = 800; // tono
-                        gain.gain.value = 0.1;     // volumen
+                        osc.frequency.value = 800;
+                        gain.gain.value = 0.1;
                         osc.start();
                         osc.stop(ac.currentTime + 0.1);
                     } catch(e) {}
-                    
-                    // Simular el disparo automatico
                     btn.click();
                 }
             }
         });
     }
     """
-    
-    # Acoplar el controlador al cargar la pagina web
-    app.load(_js=js_accesibilidad)
 
     # Pie de pagina
     gr.Markdown("---")
@@ -219,4 +205,13 @@ with gr.Blocks(
 
 # Ejecutar la aplicacion
 if __name__ == "__main__":
-    app.launch()
+    app.launch(
+        theme=gr.themes.Soft(
+            primary_hue="blue",
+            secondary_hue="sky",
+            neutral_hue="slate",
+            font=[gr.themes.GoogleFont("Inter"), "sans-serif"]
+        ),
+        css=CSS_PERSONALIZADO,
+        js=js_accesibilidad
+    )
