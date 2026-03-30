@@ -11,10 +11,14 @@
 
 import gradio as gr
 import os
+from datetime import datetime
 from PIL import Image
 from vision import analizar_imagen
 from tts import texto_a_voz
 from config import TITULO_APP, DESCRIPCION_APP, VOCES_DISPONIBLES, VOZ_ESPAÑOL
+
+# --- Historial de analisis (se almacena en memoria durante la sesion) ---
+historial_analisis = []
 
 # --- CSS personalizado para un look profesional y accesible ---
 CSS_PERSONALIZADO = """
@@ -53,17 +57,18 @@ def procesar_imagen(imagen, nombre_voz):
     1. Recibe la imagen y la voz desde la interfaz
     2. Envia la imagen a Gemini Vision para obtener descripcion
     3. Convierte la descripcion a voz con Edge TTS
-    4. Retorna el texto y el audio al usuario
+    4. Guarda el resultado en el historial de la sesion
+    5. Retorna el texto, el audio y el historial actualizado
 
     Args:
         imagen: PIL.Image - imagen capturada por el usuario
         nombre_voz: str - clave visible seleccionada del dropdown
 
     Returns:
-        tuple: (descripcion_texto, ruta_audio)
+        tuple: (descripcion_texto, ruta_audio, historial_actualizado)
     """
     if imagen is None:
-        return "No se recibio ninguna imagen. Por favor sube una foto o usa la camara.", None
+        return "No se recibio ninguna imagen. Por favor sube una foto o usa la camara.", None, historial_analisis
 
     try:
         # Notificar visualmente y resolver el acento correspondiente
@@ -76,7 +81,12 @@ def procesar_imagen(imagen, nombre_voz):
         # Paso 2: Convertir descripcion a voz
         archivo_audio = texto_a_voz(descripcion, voz_id=voz_real)
 
-        return descripcion, archivo_audio
+        # Paso 3: Guardar en historial de la sesion
+        hora = datetime.now().strftime("%H:%M:%S")
+        resumen = descripcion[:80] + "..." if len(descripcion) > 80 else descripcion
+        historial_analisis.append([hora, resumen])
+
+        return descripcion, archivo_audio, historial_analisis
 
     except Exception as e:
         error_tec = str(e)
@@ -92,7 +102,7 @@ def procesar_imagen(imagen, nombre_voz):
         else:
             msg = "⚠️ Lo siento, ocurrió un error técnico inesperado. Por favor, intenta con otra imagen."
             
-        return msg, None
+        return msg, None, historial_analisis
 
 
 # =============================================================
@@ -148,6 +158,15 @@ with gr.Blocks(
                 autoplay=True
             )
 
+    # --- Historial de analisis de la sesion ---
+    with gr.Accordion("📋 Historial de análisis", open=False):
+        historial_output = gr.Dataframe(
+            headers=["Hora", "Descripción (resumen)"],
+            label="Análisis realizados en esta sesión",
+            interactive=False,
+            wrap=True
+        )
+
     # --- Imagenes de ejemplo (backup para la demo del 9 de abril) ---
     ruta_ejemplos = os.path.join(os.path.dirname(__file__), "ejemplos")
     if os.path.exists(ruta_ejemplos):
@@ -162,11 +181,11 @@ with gr.Blocks(
             label="Ejemplos precargados"
         )
 
-    # Conectar boton con funcion (ahora pasa la imagen y el dropdown de la voz)
+    # Conectar boton con funcion (ahora incluye historial en outputs)
     boton_analizar.click(
         fn=procesar_imagen,
         inputs=[imagen_input, selector_voz],
-        outputs=[texto_output, audio_output]
+        outputs=[texto_output, audio_output, historial_output]
     )
 
     # ================= Accesibilidad Global =================
