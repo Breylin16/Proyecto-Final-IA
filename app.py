@@ -42,6 +42,12 @@ CSS_PERSONALIZADO = """
     border-radius: 12px !important;
 }
 
+#estado-proceso {
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.05em;
+}
+
 footer {
     text-align: center;
     opacity: 0.7;
@@ -71,17 +77,19 @@ def procesar_imagen(imagen, nombre_voz):
         return "No se recibio ninguna imagen. Por favor sube una foto o usa la camara.", None, historial_analisis
 
     try:
-        # Notificar visualmente y resolver el acento correspondiente
-        gr.Info("Procesando imagen, por favor espera un momento...")
+        # Resolver el acento correspondiente
         voz_real = VOCES_DISPONIBLES.get(nombre_voz, VOZ_ESPAÑOL)
         
-        # Paso 1: Analizar imagen con Gemini Vision
+        # Paso 1: Clasificar con modelo local PyTorch
+        gr.Info("🧠 Paso 1/3 — Clasificando imagen con ResNet18 (PyTorch local)...")
         descripcion = analizar_imagen(imagen)
 
         # Paso 2: Convertir descripcion a voz
+        gr.Info("🔊 Paso 2/3 — Generando audio con Edge TTS...")
         archivo_audio = texto_a_voz(descripcion, voz_id=voz_real)
 
         # Paso 3: Guardar en historial de la sesion
+        gr.Info("✅ Paso 3/3 — Listo. Reproduciendo descripción...")
         hora = datetime.now().strftime("%H:%M:%S")
         resumen = descripcion[:80] + "..." if len(descripcion) > 80 else descripcion
         historial_analisis.append([hora, resumen])
@@ -149,7 +157,8 @@ with gr.Blocks(
             texto_output = gr.Textbox(
                 label="Descripción generada",
                 lines=10,
-                interactive=False
+                interactive=False,
+                placeholder="La descripción aparecerá aquí después de analizar una imagen..."
             )
             gr.Markdown("### 🔊 Audio de la descripción")
             audio_output = gr.Audio(
