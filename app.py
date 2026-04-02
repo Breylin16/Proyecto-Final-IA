@@ -223,11 +223,27 @@ with gr.Blocks(
     }
     """
 
-    # Pie de pagina
+    # --- Informacion del proyecto ---
+    with gr.Accordion("ℹ️ Acerca del proyecto", open=False):
+        gr.Markdown(
+            "### VisionAI — Asistente de Descripción Visual\n\n"
+            "Aplicación de accesibilidad que describe escenas para personas "
+            "con discapacidad visual mediante inteligencia artificial.\n\n"
+            "**Tecnologías utilizadas:**\n\n"
+            "- PyTorch (ResNet18) — Clasificación local con Deep Learning\n"
+            "- Google Gemini 2.5 Flash — Descripción detallada de escenas\n"
+            "- Edge TTS — Síntesis de voz neuronal en español\n"
+            "- Gradio — Interfaz web accesible\n\n"
+            "**Materia:** Inteligencia Artificial — 10mo Cuatrimestre\n\n"
+            "**Profesor:** Yoel Pilier"
+        )
+
+    # Pie de pagina con creditos
     gr.Markdown("---")
     gr.Markdown(
-        "**VisionAI** — Proyecto Final de Inteligencia Artificial | "
-        "Breylin Gabriel Sanchez Santana | 23-EISN-2-003"
+        "**VisionAI** v1.0 — Proyecto Final de Inteligencia Artificial | "
+        "Breylin Gabriel Sanchez Santana | 23-EISN-2-003 | "
+        "Universidad — Abril 2026"
     )
 
 
