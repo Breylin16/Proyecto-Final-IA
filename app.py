@@ -113,9 +113,56 @@ def procesar_imagen(imagen, nombre_voz):
         return msg, None, historial_analisis
 
 
-# =============================================================
-# INTERFAZ GRADIO
-# =============================================================
+# ================= Accesibilidad Global =================
+# JavaScript: Atajos de teclado para Discapacidad Visual
+# Las teclas F y J tienen relieves tactiles universales en todos los
+# teclados, permitiendo a la persona ciega orientar sus dedos.
+# Desde ahi: menique derecho -> Enter, pulgar -> Barra Espaciadora.
+SCRIPT_ACCESIBILIDAD = """
+<script>
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        document.addEventListener('keydown', function(event) {
+            // No disparar si el usuario esta escribiendo en un campo de texto
+            var tag = document.activeElement.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+            // Atajos: Enter o Barra Espaciadora
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+
+                // Buscar el boton principal por su texto
+                var botones = document.querySelectorAll('button');
+                var btn = null;
+                for (var i = 0; i < botones.length; i++) {
+                    if (botones[i].textContent.indexOf('Describir') !== -1) {
+                        btn = botones[i];
+                        break;
+                    }
+                }
+
+                if (btn) {
+                    // Bip de confirmacion auditiva
+                    try {
+                        var ac = new (window.AudioContext || window.webkitAudioContext)();
+                        var osc = ac.createOscillator();
+                        var gain = ac.createGain();
+                        osc.connect(gain);
+                        gain.connect(ac.destination);
+                        osc.frequency.value = 800;
+                        gain.gain.value = 0.15;
+                        osc.start();
+                        osc.stop(ac.currentTime + 0.15);
+                    } catch(e) {}
+
+                    btn.click();
+                }
+            }
+        });
+    }, 1000);
+});
+</script>
+"""
 
 # Crear la interfaz
 with gr.Blocks(
@@ -197,47 +244,6 @@ with gr.Blocks(
         outputs=[texto_output, audio_output, historial_output]
     )
 
-    # ================= Accesibilidad Global =================
-    # JavaScript: Atajos de teclado para Discapacidad Visual
-    # Las teclas F y J tienen relieves tactiles universales en todos los
-    # teclados, permitiendo a la persona ciega orientar sus dedos.
-    # Desde ahi: menique derecho → Enter, pulgar → Barra Espaciadora.
-    js_accesibilidad = """
-    function() {
-        document.addEventListener('keydown', function(event) {
-            // No disparar si el usuario esta escribiendo en un campo de texto
-            const tag = document.activeElement.tagName.toLowerCase();
-            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-
-            // Atajos: Enter o Barra Espaciadora
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-
-                // Buscar el boton principal (compatible con Gradio 6)
-                const btn = document.querySelector('button[variant="primary"]')
-                          || document.querySelector('button.primary')
-                          || document.querySelector('#component-0 button');
-
-                if (btn) {
-                    // Bip de confirmacion auditiva
-                    try {
-                        let ac = new (window.AudioContext || window.webkitAudioContext)();
-                        let osc = ac.createOscillator();
-                        let gain = ac.createGain();
-                        osc.connect(gain);
-                        gain.connect(ac.destination);
-                        osc.frequency.value = 800;
-                        gain.gain.value = 0.1;
-                        osc.start();
-                        osc.stop(ac.currentTime + 0.12);
-                    } catch(e) {}
-
-                    btn.click();
-                }
-            }
-        });
-    }
-    """
 
     # --- Informacion del proyecto ---
     with gr.Accordion("ℹ️ Acerca del proyecto", open=False):
@@ -274,5 +280,5 @@ if __name__ == "__main__":
             font=[gr.themes.GoogleFont("Inter"), "sans-serif"]
         ),
         css=CSS_PERSONALIZADO,
-        js=js_accesibilidad
+        head=SCRIPT_ACCESIBILIDAD
     )
