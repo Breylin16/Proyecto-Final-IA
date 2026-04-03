@@ -198,13 +198,28 @@ with gr.Blocks(
     )
 
     # ================= Accesibilidad Global =================
-    # JavaScript: Escucha el teclado para Discapacidad Visual
+    # JavaScript: Atajos de teclado para Discapacidad Visual
+    # Las teclas F y J tienen relieves tactiles universales en todos los
+    # teclados, permitiendo a la persona ciega orientar sus dedos.
+    # Desde ahi: menique derecho → Enter, pulgar → Barra Espaciadora.
     js_accesibilidad = """
     function() {
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                const btn = document.querySelector('button.primary');
+            // No disparar si el usuario esta escribiendo en un campo de texto
+            const tag = document.activeElement.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+            // Atajos: Enter o Barra Espaciadora
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+
+                // Buscar el boton principal (compatible con Gradio 6)
+                const btn = document.querySelector('button[variant="primary"]')
+                          || document.querySelector('button.primary')
+                          || document.querySelector('#component-0 button');
+
                 if (btn) {
+                    // Bip de confirmacion auditiva
                     try {
                         let ac = new (window.AudioContext || window.webkitAudioContext)();
                         let osc = ac.createOscillator();
@@ -214,8 +229,9 @@ with gr.Blocks(
                         osc.frequency.value = 800;
                         gain.gain.value = 0.1;
                         osc.start();
-                        osc.stop(ac.currentTime + 0.1);
+                        osc.stop(ac.currentTime + 0.12);
                     } catch(e) {}
+
                     btn.click();
                 }
             }
@@ -234,8 +250,9 @@ with gr.Blocks(
             "- Google Gemini 2.5 Flash — Descripción detallada de escenas\n"
             "- Edge TTS — Síntesis de voz neuronal en español\n"
             "- Gradio — Interfaz web accesible\n\n"
-            "**Materia:** Inteligencia Artificial — 10mo Cuatrimestre\n\n"
-            "**Profesor:** Yoel Pilier"
+            "**Materia:** Inteligencia Artificial\n\n"
+            "**Profesor:** Yoel Pilier\n\n"
+            "**Universidad:** O&M"
         )
 
     # Pie de pagina con creditos
@@ -243,7 +260,7 @@ with gr.Blocks(
     gr.Markdown(
         "**VisionAI** v1.0 — Proyecto Final de Inteligencia Artificial | "
         "Breylin Gabriel Sanchez Santana | 23-EISN-2-003 | "
-        "Universidad — Abril 2026"
+        "Universidad O&M — Abril 2026"
     )
 
 
