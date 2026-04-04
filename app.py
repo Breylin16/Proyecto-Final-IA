@@ -1,10 +1,12 @@
 # --- VisionAI: Aplicacion Principal ---
 # Nombre: Breylin Gabriel Sanchez Santana
 # Matricula: 23-EISN-2-003
+# Universidad: O&M
 #
 # Interfaz grafica en Gradio que integra:
 # 1. Analisis de imagen con Google Gemini (deep learning / vision)
 # 2. Text-to-Speech con Edge TTS (voz natural en español)
+# 3. Atajos de accesibilidad: Enter y Barra Espaciadora
 #
 # El usuario sube una imagen o usa la camara, la IA describe
 # la escena y reproduce la descripcion en voz alta.
