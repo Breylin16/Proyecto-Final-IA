@@ -125,9 +125,9 @@ SCRIPT_ACCESIBILIDAD = """
 window.addEventListener('load', function() {
     setTimeout(function() {
         document.addEventListener('keydown', function(event) {
-            // No disparar si el usuario esta escribiendo en un campo de texto
+            // No disparar si el usuario esta en un campo de texto o un boton
             var tag = document.activeElement.tagName.toLowerCase();
-            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'button') return;
 
             // Atajos: Enter o Barra Espaciadora
             if (event.key === 'Enter' || event.key === ' ') {
@@ -187,11 +187,10 @@ with gr.Blocks(
             
             # Selector de voces para navegacion de configuracion
             opciones_voces = list(VOCES_DISPONIBLES.keys())
-            selector_voz = gr.Dropdown(
+            selector_voz = gr.Radio(
                 choices=opciones_voces,
                 value=opciones_voces[0],
                 label="🎙️ Seleccionar Voz / Acento",
-                interactive=True
             )
             
             boton_analizar = gr.Button(
