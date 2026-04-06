@@ -100,3 +100,9 @@ La aplicación está diseñada para personas con discapacidad visual:
 - **Barra Espaciadora:** Como alternativa, el pulgar baja a la Barra Espaciadora.
 - **Bip sonoro:** Al presionar Enter o Espacio, se reproduce una confirmación auditiva para que la persona sepa que la acción se ejecutó.
 - **Lectores de pantalla:** Gradio genera HTML semántico compatible con NVDA y otros lectores de pantalla.
+
+## Video Demostrativo
+
+[![VisionAI Demo](https://img.youtube.com/vi/qzfalOAKAac/0.jpg)](https://youtu.be/qzfalOAKAac)
+
+🔗 **Ver video:** https://youtu.be/qzfalOAKAac
